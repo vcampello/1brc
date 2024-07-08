@@ -1,6 +1,19 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
-import { fileVersion, MAX_LINE_LENGTH, createLogger } from './shared';
+import path from 'node:path';
+import { createTaskRunner, Task } from './task';
+import { createLogger } from './logger';
+
+import { config } from './config';
+
+const fileVersion = {
+    x_1b: path.join(__dirname, '../data/measurements.txt'),
+    x_20: path.join(__dirname, '../data/measurements-x20.txt'),
+    x_1k: path.join(__dirname, '../data/measurements-x1k.txt'),
+    x_50k: path.join(__dirname, '../data/measurements-x50k.txt'),
+    x_50m: path.join(__dirname, '../data/measurements-x50m.txt'),
+} as const;
+
 const log = createLogger('main');
 
 async function createTasks(): Promise<Task[]> {
@@ -30,9 +43,9 @@ async function createTasks(): Promise<Task[]> {
         tasks.push(task); // push it here and mutate below
 
         const lookahead = await fd.read(
-            Buffer.alloc(MAX_LINE_LENGTH),
+            Buffer.alloc(config.maxLineLength),
             0,
-            MAX_LINE_LENGTH,
+            config.maxCityLength,
             task.readEnd,
         );
 
@@ -64,11 +77,12 @@ async function createTasks(): Promise<Task[]> {
     return tasks;
 }
 
-import { createTaskRunner, Task } from './task';
-
 async function main() {
     const tasks = await createTasks();
-    const result = await Promise.all(tasks.map(createTaskRunner));
+    const workerFilepath = path.join(__dirname, './worker');
+    const result = await Promise.all(
+        tasks.map((t) => createTaskRunner(t, workerFilepath)),
+    );
 
     const aggregated = result.reduce(
         (acc, cur) => {

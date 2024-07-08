@@ -8,56 +8,17 @@ export const fileVersion = {
     x_50m: path.join(__dirname, '../data/measurements-x50m.txt'),
 } as const;
 
-export const CHAR_NEWLINE = '\n'.charCodeAt(0);
-export const CHAR_SEMICOLON = ';'.charCodeAt(0); // Buffer.from(';')
-export const CHAR_MINUS = '-'.charCodeAt(0); // Buffer.from(';')
-export const CHAR_PERIOD = '.'.charCodeAt(0); // Buffer.from(';')
-
-export const MAX_CITY_LENGTH = 100;
-export const MAX_TEMP_LENGTH = 5; // temp:  -99.9 (inclusive) and 99.9 (inclusive
-export const MAX_LINE_LENGTH = MAX_CITY_LENGTH + MAX_TEMP_LENGTH + 2; // City, temp, semicolon and newline;
-
-export const COLOR = {
-    reset: '\x1b[0m',
-    bright: '\x1b[1m',
-    dim: '\x1b[2m',
-    underscore: '\x1b[4m',
-    blink: '\x1b[5m',
-    reverse: '\x1b[7m',
-    hidden: '\x1b[8m',
-    fgBlack: '\x1b[30m',
-    fgRed: '\x1b[31m',
-    fgGreen: '\x1b[32m',
-    fgYellow: '\x1b[33m',
-    fgBlue: '\x1b[34m',
-    fgMagenta: '\x1b[35m',
-    fgCyan: '\x1b[36m',
-    fgWhite: '\x1b[37m',
-    fgGray: '\x1b[90m',
-    bgBlack: '\x1b[40m',
-    bgRed: '\x1b[41m',
-    bgGreen: '\x1b[42m',
-    bgYellow: '\x1b[43m',
-    bgBlue: '\x1b[44m',
-    bgMagenta: '\x1b[45m',
-    bgCyan: '\x1b[46m',
-    bgWhite: '\x1b[47m',
-    bgGray: '\x1b[100m',
+export const Constants = {
+    char: {
+        newline: '\n'.charCodeAt(0),
+        semicolon: ','.charCodeAt(0), // Buffer.from(';')
+        minus: '-'.charCodeAt(0), // Buffer.from(';')
+        period: '.'.charCodeAt(0), // Buffer.from(';')
+    },
+    maxCityLength: 100,
+    maxTempLength: 5,
+    maxLineLength: 107, // City, temp, semicolon and newline;
 } as const;
-
-export type COLOR = (typeof COLOR)[keyof typeof COLOR];
-
-export const createLogger =
-    (id?: string | number, color?: COLOR) =>
-    (...args: Parameters<typeof console.log>) => {
-        const prefix = id !== undefined ? `[${id}]` : '';
-        const prefixColor = color ?? COLOR.fgGreen;
-
-        console.log(
-            `${COLOR.bright}${prefixColor}${prefix}${COLOR.reset}`,
-            ...args,
-        );
-    };
 
 export class Station {
     name: string;

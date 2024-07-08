@@ -11,17 +11,6 @@ build:
 	$(LOCAL)/tsc-alias --project tsconfig.build.json
 
 
-.PHONY: run-v1
-run-v1: clean build
-	# node --inspect dist/v1.js
-	node dist/v1.js
-
-.PHONY: run-v2
-run-v2: clean build
-	# node --inspect dist/v1.js
-	node dist/v2.js
-
-.PHONY: run-v3
-run-v3: clean build
-	# node --inspect dist/v1.js
-	node dist/v3.js
+.PHONY: run
+run: clean build
+	node dist/index.js

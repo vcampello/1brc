@@ -5,7 +5,7 @@ import {
     threadId,
     parentPort,
 } from 'node:worker_threads';
-import { isTask, parseTemp } from './task';
+import { isTask, parseTempToInt } from './task';
 import { createLogger, LoggerColor } from './logger';
 import { config } from './config';
 import { Aggregator } from './station';
@@ -67,7 +67,7 @@ async function runTask() {
                 });
                 const city = line.toString('utf-8', 0, tempStart - 1);
                 const temp = line.toString('utf-8', tempStart, lineEnd);
-                stations.update(city, parseTemp(temp));
+                stations.update(city, parseTempToInt(temp));
 
                 processedLines++;
                 lineEnd = 0;

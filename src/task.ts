@@ -26,11 +26,11 @@ export function isTask(task: unknown): task is Task {
     return has_readStart && has_readEnd && has_filename;
 }
 
-export function parseTemp(temp: string) {
+export function parseTempToInt(temp: string) {
     // WARN: optmise
-    // const sign = buffer[0] === CHAR_MINUS ? -1 : 1;
+    // const sign = temp[0] === CHAR_MINUS ? -1 : 1;
 
-    return Number.parseFloat(temp);
+    return Number.parseFloat(temp) * 10;
 }
 
 export function createTaskRunner(task: Task, filename: string) {

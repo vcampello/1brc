@@ -1,25 +1,3 @@
-import path from 'path';
-
-export const fileVersion = {
-    x_1b: path.join(__dirname, '../data/measurements.txt'),
-    x_20: path.join(__dirname, '../data/measurements-x20.txt'),
-    x_1k: path.join(__dirname, '../data/measurements-x1k.txt'),
-    x_50k: path.join(__dirname, '../data/measurements-x50k.txt'),
-    x_50m: path.join(__dirname, '../data/measurements-x50m.txt'),
-} as const;
-
-export const Constants = {
-    char: {
-        newline: '\n'.charCodeAt(0),
-        semicolon: ','.charCodeAt(0), // Buffer.from(';')
-        minus: '-'.charCodeAt(0), // Buffer.from(';')
-        period: '.'.charCodeAt(0), // Buffer.from(';')
-    },
-    maxCityLength: 100,
-    maxTempLength: 5,
-    maxLineLength: 107, // City, temp, semicolon and newline;
-} as const;
-
 export class Station {
     name: string;
     count: number;

@@ -14,6 +14,7 @@
     "format:write": "prettier ./ --write",
     "lint": "eslint ./src/ ./specs/",
     "test": "node -r ts-node/register --test ./specs/**/*.spec.ts",
+    "test:watch": "node -r ts-node/register --watch --test ./specs/**/*.spec.ts",
     "watch": "node -r ts-node/register --watch src/index.ts"
   },
   "devDependencies": {

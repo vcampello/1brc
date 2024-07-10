@@ -1,100 +1,61 @@
-export class Station {
-    name: string;
+export type Station = {
     count: number;
     max: number;
     min: number;
-    total: number;
+    name: string;
+    sum: number;
+};
 
-    set mean(value: void) {
-        throw new Error('Mean should not be set');
-    }
+function calculateMean(station: Station): number {
+    return station.sum / station.count;
+}
 
-    get mean(): number {
-        return this.total / this.count;
-    }
+/**
+ * Parses temperature string in the format '-99.9' to -99.9
+ */
+function parseTemp(temp: string): number {
+    return Number.parseFloat(temp);
+}
 
-    constructor(name: string) {
-        this.name = name;
-        this.count = 0;
-        this.max = 0;
-        this.min = 0;
-        this.total = 0;
-    }
+function toString(station: Station): string {
+    return `${station.name}=${station.min}/${calculateMean(station).toFixed(1)}/${station.max}`;
+}
 
-    recordTemp(temp: number) {
-        this.min = Math.min(this.min, temp);
-        this.max = Math.max(this.max, temp);
-        this.total += temp;
-        this.count++;
-    }
+function createStation(name: string, temp: number): Station {
+    return {
+        count: 1,
+        max: temp,
+        min: temp,
+        name,
+        sum: temp,
+    };
+}
 
-    toString() {
-        return JSON.stringify(this);
-    }
+function updateStation(station: Station, temp: number): void {
+    station.min = Math.min(station.min, temp);
+    station.max = Math.max(station.max, temp);
+    station.sum += temp;
+    station.count++;
+}
 
-    static merge(name: string, ...stations: Station[]): Station {
-        const aggregate = stations.reduce(
-            (acc, cur) => {
-                if (cur.name === name) {
-                    acc.min = Math.min(acc.min, cur.min);
-                    acc.max = Math.max(acc.max, cur.min);
-                    acc.total += cur.total;
-                    acc.count += cur.count;
-                } else {
-                    console.log('Unexpected station name:', cur.name);
-                }
-                return acc;
-            },
-            {
-                name,
-                count: 0,
-                min: 0,
-                max: 0,
-                total: 0,
-            },
+function mergeIntoTarget(target: Station, other: Station) {
+    if (other.name !== target.name) {
+        throw new Error(
+            `Cannot merge stations with different names. Expected ${target.name} but received ${other.name}`,
         );
-        const merged = new Station(name);
-        merged.count = aggregate.count;
-        merged.min = aggregate.min;
-        merged.max = aggregate.max;
-        merged.total = aggregate.total;
-
-        return merged;
     }
+
+    target.min = Math.min(target.min, other.min);
+    target.max = Math.max(target.max, other.max);
+    target.sum += other.sum;
+    target.count += other.count;
 }
 
-export class Aggregator {
-    stations: Map<string, Station>;
-
-    constructor() {
-        this.stations = new Map();
-    }
-
-    update(name: string, temp: number): Station {
-        let station = this.stations.get(name);
-
-        if (!station) {
-            station = new Station(name);
-            this.stations.set(name, station);
-        }
-
-        station.recordTemp(temp);
-        return station;
-    }
-
-    /*
-    static merge(...aggregators: Aggregator[]): Map<string, Station[]> {
-        const byName = new Map<string, Station[]>();
-
-        for (const agg of aggregators) {
-            for (const [name, stationRecord] of agg.stations.entries()) {
-                let station = allStations.get(name);
-                if (!station) {
-                }
-            }
-        }
-
-        return byName.;
-    }
-    */
-}
+export const stationHelper = {
+    calculateMean,
+    createStation,
+    mergeIntoTarget,
+    parseTemp,
+    toString,
+    updateStation,
+};

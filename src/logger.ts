@@ -42,3 +42,10 @@ export const createLogger =
 
         console.log(...args);
     };
+
+/** Default logger */
+export const log = createLogger('main');
+
+export const generatePerformanceLog = () => {
+    return `${(performance.now() / 1000).toFixed(3)} seconds.` as const;
+};

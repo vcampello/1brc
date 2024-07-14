@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import { parentPort, threadId, Worker } from 'node:worker_threads';
 import { Aggregator } from './aggregator';
-import { log } from './logger';
+import { logger } from './logger';
 import { config } from './config';
 
 export type Task = {
@@ -12,6 +12,7 @@ export type Task = {
 };
 
 export type TaskResult = {
+    threadId: number;
     processedLines: number;
     aggregator: Aggregator;
 };
@@ -63,7 +64,7 @@ function calculateThreadPoolAndChunkSize(args: {
     const threadCount = potentialThreads >= cpus ? cpus : potentialThreads;
     const chunkSize = Math.floor(args.fileSizeInBytes / threadCount);
 
-    log('Thread pool and chunk size:', {
+    logger.info('Thread pool and chunk size:', {
         cpus,
         fileSizeInBytes,
         minChunkSize,
@@ -82,7 +83,7 @@ async function planTasks(filepath: string): Promise<Task[]> {
     const fd = await fs.open(filepath, 'r');
     const fStats = await fd.stat();
 
-    log('File stats:', {
+    logger.info('File stats:', {
         filepath,
         size: fStats.size,
     });

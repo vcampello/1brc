@@ -2,7 +2,7 @@ import path from 'node:path';
 import { taskHelper } from './task';
 
 import { Aggregator, aggregatorHelper } from './aggregator';
-import { generatePerformanceLog, log } from './logger';
+import { logger } from './logger';
 
 const fileVersion = {
     x_1b: path.join(__dirname, '../data/measurements.txt'),
@@ -13,32 +13,35 @@ const fileVersion = {
 } as const;
 
 async function main() {
-    const tasks = await taskHelper.planTasks(fileVersion.x_20);
+    const tasks = await taskHelper.planTasks(fileVersion.x_50m);
     const workerFilepath = path.join(__dirname, './worker');
     const result = await Promise.all(
         tasks.map((t) => taskHelper.createTaskRunner(t, workerFilepath)),
     );
 
     const { processedLines, aggregators } = result.reduce<{
-        processedLines: number;
         aggregators: Aggregator[];
+        processedLines: number;
     }>(
         (acc, cur) => {
             acc.processedLines += cur.processedLines;
             acc.aggregators.push(cur.aggregator);
             return acc;
         },
-        { processedLines: 0, aggregators: [] },
+        {
+            aggregators: [],
+            processedLines: 0,
+        },
     );
 
     const combinedData = aggregatorHelper.mergeIntoNewAggregator(
         ...aggregators,
     );
-    log(aggregatorHelper.toString(combinedData));
-    log('Done:', {
-        processedLines,
-        perf: generatePerformanceLog(),
-    });
+
+    logger.info(aggregatorHelper.toString(combinedData));
+    logger.info(
+        `Processed ${processedLines.toLocaleString()} in ${(performance.now() / 1000).toFixed(3)} seconds`,
+    );
 }
 
 main();

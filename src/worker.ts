@@ -6,7 +6,7 @@ import {
     parentPort,
 } from 'node:worker_threads';
 import { taskHelper } from './task';
-import { createLogger, generatePerformanceLog, LoggerColor } from './logger';
+import { Logger, LoggerColor } from './logger';
 import { config } from './config';
 import { aggregatorHelper } from './aggregator';
 import { stationHelper } from './station';
@@ -14,6 +14,11 @@ import { stationHelper } from './station';
 if (isMainThread) {
     throw new Error('Do not run or require this file directly');
 }
+
+const wkLogger = new Logger({
+    prefix: `worker ${threadId.toString().padStart(2, '0')}`,
+    prefixColor: LoggerColor.fgYellow,
+});
 
 // Entrypoint
 runTask();
@@ -25,10 +30,6 @@ async function runTask() {
     if (!taskHelper.isTask(task)) {
         throw new Error('Worker data is not a Task:', task);
     }
-    const log = createLogger(
-        `worker ${threadId.toString().padStart(2, '0')}`,
-        LoggerColor.fgYellow,
-    );
 
     // Let's stop  right away instead of waiting for the end
     if (!parentPort) {
@@ -36,7 +37,7 @@ async function runTask() {
     }
 
     // Start
-    log('Running task:', task);
+    wkLogger.info('Running task:', Logger.inlineFlatObject(task, ['filepath']));
 
     const readStream = createReadStream(task.filepath, {
         start: task.readStart,
@@ -52,13 +53,11 @@ async function runTask() {
     const aggregator = aggregatorHelper.createAggregator();
 
     for await (const chunk of readStream) {
-        // log('chunk length:', chunk.length);
-        // this would be less confusing with 2 loops
         for (let i = 0, len = chunk.length; i < len; i++) {
-            const c = chunk[i];
-            line[lineEnd] = c;
+            const char = chunk[i];
+            line[lineEnd] = char;
 
-            if (c === config.asciiCode.newline) {
+            if (char === config.asciiCode.newline) {
                 /*
                 log('line', processedLines, {
                     tempStart,
@@ -82,7 +81,7 @@ async function runTask() {
                 continue;
             }
 
-            if (c === config.asciiCode.semicolon) {
+            if (char === config.asciiCode.semicolon) {
                 tempStart = lineEnd + 1;
             }
 
@@ -92,10 +91,11 @@ async function runTask() {
 
     readStream.close();
 
-    log('Shutting down:', {
-        processedLines,
-        perf: generatePerformanceLog(),
-    });
+    wkLogger.info(`Processed ${processedLines.toLocaleString()} lines`);
 
-    taskHelper.postTaskResult({ processedLines, aggregator });
+    taskHelper.postTaskResult({
+        threadId,
+        processedLines,
+        aggregator,
+    });
 }

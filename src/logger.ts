@@ -15,37 +15,69 @@ export const LoggerColor = {
     fgCyan: '\x1b[36m',
     fgWhite: '\x1b[37m',
     fgGray: '\x1b[90m',
-    bgBlack: '\x1b[40m',
-    bgRed: '\x1b[41m',
-    bgGreen: '\x1b[42m',
-    bgYellow: '\x1b[43m',
-    bgBlue: '\x1b[44m',
-    bgMagenta: '\x1b[45m',
-    bgCyan: '\x1b[46m',
-    bgWhite: '\x1b[47m',
-    bgGray: '\x1b[100m',
 } as const;
 
 export type LoggerColor = (typeof LoggerColor)[keyof typeof LoggerColor];
 
-export const createLogger =
-    (id?: string | number, color?: LoggerColor) =>
-    (...args: Parameters<typeof console.log>) => {
-        const prefix = id !== undefined ? `[${id}]` : '';
-        const prefixColor = color ?? LoggerColor.fgGreen;
-        if (prefix) {
-            // prevent leading empty space if there is no prefix
-            args.unshift(
-                `${LoggerColor.bright}${prefixColor}${prefix}${LoggerColor.reset}`,
-            );
+type ConsoleLog = Parameters<typeof console.log>;
+
+export class Logger {
+    #prefix: string | number | undefined;
+    #prefixColor: LoggerColor;
+    silent: boolean;
+
+    constructor(args?: {
+        prefix?: string | number;
+        prefixColor?: LoggerColor;
+        silent?: boolean;
+    }) {
+        this.#prefix = args?.prefix;
+        this.#prefixColor = args?.prefixColor ?? LoggerColor.reset;
+        this.silent = args?.silent ?? false;
+    }
+
+    /** Format prefix and message */
+    #format(args: ConsoleLog): ConsoleLog {
+        // prevent leading empty space if there is no prefix
+        if (this.#prefix) {
+            const formattedPrefix = [
+                // LoggerColor.bright,
+                this.#prefixColor,
+                '[',
+                this.#prefix,
+                ']',
+                LoggerColor.reset,
+            ].join('');
+            args.unshift(formattedPrefix);
         }
 
-        console.log(...args);
-    };
+        return args;
+    }
+
+    info(...args: ConsoleLog) {
+        if (this.silent) {
+            return;
+        }
+        console.log(...this.#format(args));
+    }
+
+    static inlineFlatObject<Obj extends Record<PropertyKey, unknown>>(
+        obj: Obj,
+        removeKeys: (keyof Obj)[] = [],
+    ): string {
+        const components: string[] = [];
+
+        Object.entries(obj).forEach(([key, value]) => {
+            if (!removeKeys.includes(key)) {
+                components.push(`${key}=${value}`);
+            }
+        });
+        return components.join(', ');
+    }
+}
 
 /** Default logger */
-export const log = createLogger('main');
-
-export const generatePerformanceLog = () => {
-    return `${(performance.now() / 1000).toFixed(3)} seconds.` as const;
-};
+export const logger = new Logger({
+    prefix: 'info',
+    prefixColor: LoggerColor.fgGreen,
+});

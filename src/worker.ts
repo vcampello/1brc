@@ -59,6 +59,7 @@ async function runTask() {
 
             if (char === config.asciiCode.newline) {
                 /*
+                // Debug logging
                 log('line', processedLines, {
                     tempStart,
                     lineEnd,
@@ -67,13 +68,15 @@ async function runTask() {
                     temp: line.toString('utf-8', tempStart, lineEnd),
                 });
                 */
+
                 const city = line.toString('utf-8', 0, tempStart - 1);
-                const temp = line.toString('utf-8', tempStart, lineEnd);
-                aggregatorHelper.recordTemperature(
-                    aggregator,
-                    city,
-                    stationHelper.parseTemp(temp),
+                const temp = stationHelper.parseTempWithoutDecimals(
+                    line,
+                    tempStart,
                 );
+
+                // 40s without/48s
+                aggregatorHelper.recordTemperature(aggregator, city, temp);
 
                 processedLines++;
                 lineEnd = 0;

@@ -1,9 +1,10 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 import { stationHelper } from '../src/station';
+import { Logger } from '../src/logger';
 
 describe('Station', () => {
-    describe('Parses temperature correctly', () => {
+    describe('Parses temperature from string correctly', () => {
         const cases: { actual: string; expected: number }[] = [
             {
                 actual: '0.0',
@@ -21,7 +22,53 @@ describe('Station', () => {
 
         for (const { expected, actual } of cases) {
             test(`Parses ${actual} as ${expected}`, () => {
-                assert.strictEqual(stationHelper.parseTemp(actual), expected);
+                assert.strictEqual(
+                    stationHelper.parseTempWithDecimals(actual),
+                    expected,
+                );
+            });
+        }
+    });
+
+    describe('Parses temperature from buffer correctly', () => {
+        const cases: {
+            actual: string;
+            expected: number;
+            start: number;
+        }[] = [
+            {
+                actual: '0.0',
+                expected: 0,
+                start: 0,
+            },
+            {
+                actual: '99.9',
+                expected: 999,
+                start: 0,
+            },
+            {
+                actual: '-99.9',
+                expected: -999,
+                start: 0,
+            },
+
+            {
+                actual: 'Brasilia;-99.9\nLondon',
+                expected: -999,
+                start: 9,
+            },
+        ];
+
+        for (const args of cases) {
+            test(`Parses ${Logger.inlineFlatObject(args)}`, () => {
+                const { expected, actual, start } = args;
+                assert.strictEqual(
+                    stationHelper.parseTempWithoutDecimals(
+                        Buffer.from(actual),
+                        start,
+                    ),
+                    expected,
+                );
             });
         }
     });

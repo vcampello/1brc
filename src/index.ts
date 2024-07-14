@@ -1,6 +1,5 @@
 import path from 'node:path';
 import { taskHelper } from './task';
-
 import { Aggregator, aggregatorHelper } from './aggregator';
 import { logger } from './logger';
 
@@ -13,7 +12,7 @@ const fileVersion = {
 } as const;
 
 async function main() {
-    const tasks = await taskHelper.planTasks(fileVersion.x_50m);
+    const tasks = await taskHelper.planTasks(fileVersion.x_1b);
     const workerFilepath = path.join(__dirname, './worker');
     const result = await Promise.all(
         tasks.map((t) => taskHelper.createTaskRunner(t, workerFilepath)),

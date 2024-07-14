@@ -1,3 +1,5 @@
+import { config } from './config';
+
 export type Station = {
     count: number;
     max: number;
@@ -6,19 +8,55 @@ export type Station = {
     sum: number;
 };
 
-function calculateMean(station: Station): number {
-    return station.sum / station.count;
-}
-
 /**
  * Parses temperature string in the format '-99.9' to -99.9
  */
-function parseTemp(temp: string): number {
+function parseTempWithDecimals(temp: string): number {
     return Number.parseFloat(temp);
 }
 
-function toString(station: Station): string {
-    return `${station.name}=${station.min}/${calculateMean(station).toFixed(1)}/${station.max}`;
+/**
+ * Parses temperature without decimal from buffer in the format '-99.9' to -999
+ */
+function parseTempWithoutDecimals(buffer: Buffer, start: number): number {
+    let parsed = 0;
+    let cursor = start;
+    let signature = 1;
+
+    // parse negative sign if applicable
+    if (buffer[cursor] === config.asciiCode.minus) {
+        signature = -1;
+        cursor++;
+    }
+
+    // parse first digit
+    // @ts-expect-error: this is a specialised parser
+    parsed += buffer[cursor] - config.asciiCode.zero;
+    cursor++;
+
+    // if not a period then parse second digit
+    if (buffer[cursor] !== config.asciiCode.period) {
+        // @ts-expect-error: this is a specialised parser
+        parsed = parsed * 10 + (buffer[cursor] - config.asciiCode.zero);
+        cursor++;
+    }
+
+    // skip period
+    cursor++;
+
+    // parse decimal
+    // @ts-expect-error: this is a specialised parser
+    parsed = parsed * 10 + (buffer[cursor] - config.asciiCode.zero);
+
+    return signature * parsed;
+}
+
+function toString(station: Station) {
+    const min = (station.min / 10).toFixed(1);
+    const max = (station.max / 10).toFixed(1);
+    const mean = (station.sum / station.count / 10).toFixed(1);
+
+    return `${station.name}=${min}/${mean}/${max}` as const;
 }
 
 function createStation(name: string, temp: number): Station {
@@ -52,10 +90,10 @@ function mergeIntoTarget(target: Station, other: Station) {
 }
 
 export const stationHelper = {
-    calculateMean,
     createStation,
     mergeIntoTarget,
-    parseTemp,
+    parseTempWithDecimals,
+    parseTempWithoutDecimals,
     toString,
     updateStation,
 };

@@ -1,30 +1,33 @@
-import { Station, stationHelper } from './station';
+import { Station, IStation } from './station';
 
-export type Aggregator = Map<string, Station>;
+export type IAggregator = Map<string, IStation>;
 
-function createAggregator(): Aggregator {
-    return new Map<string, Station>();
+function createAggregator(): IAggregator {
+    return new Map<string, IStation>();
 }
 
-function stationList(aggregator: Aggregator): Station[] {
+/**
+ * Convert Aggregator station list to an array
+ */
+function stationList(aggregator: IAggregator): IStation[] {
     return [...aggregator.values()];
 }
 
 /**
  * Record temperature for a station. Creates a new one if it doesn't exist
- **/
+ */
 function recordTemperature(
-    aggregator: Aggregator,
+    aggregator: IAggregator,
     name: string,
     temp: number,
-): Station {
+): IStation {
     let station = aggregator.get(name);
 
     if (!station) {
-        station = stationHelper.createStation(name, temp);
+        station = Station.createStation(name, temp);
         aggregator.set(name, station);
     } else {
-        stationHelper.updateStation(station, temp);
+        Station.recordTemperature(station, temp);
     }
 
     return station;
@@ -33,18 +36,21 @@ function recordTemperature(
 /**
  * Merge station object into the aggregator.
  * Creates a clone of the supplied station if it doesn't exist.
- **/
-function mergeStation(aggregator: Aggregator, station: Station): void {
+ */
+function mergeStation(aggregator: IAggregator, station: IStation): void {
     const existingStation = aggregator.get(station.name);
 
     if (existingStation) {
-        stationHelper.mergeIntoTarget(existingStation, station);
+        Station.mergeIntoTarget(existingStation, station);
     } else {
         aggregator.set(station.name, { ...station });
     }
 }
 
-function mergeIntoNewAggregator(...aggregators: Aggregator[]): Aggregator {
+/**
+ * Take a series of aggregator and return a new aggregate
+ */
+function mergeIntoNewAggregator(...aggregators: IAggregator[]): IAggregator {
     const accumulator = createAggregator();
 
     for (const aggregator of aggregators) {
@@ -56,19 +62,24 @@ function mergeIntoNewAggregator(...aggregators: Aggregator[]): Aggregator {
     return accumulator;
 }
 
-function toString(aggregator: Aggregator): string {
+/**
+ * Convert an aggregator to string.
+ * E.g.: {Zanzibar City=-26.7/26.0/76.2, Zürich=-40.3/9.3/57.3}
+ */
+function toString(aggregator: IAggregator): string {
     const names = stationList(aggregator)
         .sort((a, b) => a.name.localeCompare(b.name))
-        .map(stationHelper.toString)
+        .map(Station.toString)
         .join(', ');
 
     return `{${names}}`;
 }
-export const aggregatorHelper = {
+
+export const Aggregator = {
     createAggregator,
+    mergeIntoNewAggregator,
     mergeStation,
     recordTemperature,
     stationList,
     toString,
-    mergeIntoNewAggregator,
 };

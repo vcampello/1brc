@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
-import os from 'node:os';
 import { parentPort, threadId, Worker } from 'node:worker_threads';
-import { Aggregator } from './aggregator';
+import { IAggregator } from './aggregator';
 import { logger } from './logger';
 import { config } from './config';
 
@@ -9,15 +8,17 @@ export type Task = {
     readStart: number;
     readEnd: number;
     filepath: string;
+    silent: boolean;
 };
 
 export type TaskResult = {
     threadId: number;
     processedLines: number;
-    aggregator: Aggregator;
+    aggregator: IAggregator;
 };
 
 function isTask(task: unknown): task is Task {
+    // This guard is overkill but we'll validate everything
     if (!task || typeof task !== 'object') {
         return false;
     }
@@ -25,10 +26,11 @@ function isTask(task: unknown): task is Task {
     const has_readStart =
         'readStart' in task && typeof task.readStart === 'number';
     const has_readEnd = 'readEnd' in task && typeof task.readEnd === 'number';
-    const has_filename =
+    const has_filepath =
         'filepath' in task && typeof task.filepath === 'string';
+    const has_silent = 'silent' in task && typeof task.silent === 'boolean';
 
-    return has_readStart && has_readEnd && has_filename;
+    return has_readStart && has_readEnd && has_filepath && has_silent;
 }
 
 function createTaskRunner(task: Task, filename: string) {
@@ -49,28 +51,27 @@ function postTaskResult(taskResult: TaskResult) {
 }
 
 /**
- * Calculate max number of threads and chunk size depending on the size of the input. It prevents starting the threads by supplying incomplete lines.
+ * Calculate max number of threads and chunk size depending on the size of the input.
+ * It prevents starving threads by supplying incomplete lines.
  */
 function calculateThreadPoolAndChunkSize(args: {
     fileSizeInBytes: number;
     minChunkSize: number;
+    threads: number;
 }): { threadCount: number; chunkSize: number } {
     const { minChunkSize, fileSizeInBytes } = args;
-    const cpus = os.cpus().length;
-    const potentialThreads = Math.floor(
-        args.fileSizeInBytes / args.minChunkSize,
-    );
+    const maxChunks = Math.floor(args.fileSizeInBytes / args.minChunkSize);
 
-    const threadCount = potentialThreads >= cpus ? cpus : potentialThreads;
+    const threadCount = maxChunks >= args.threads ? args.threads : maxChunks;
     const chunkSize = Math.floor(args.fileSizeInBytes / threadCount);
 
     logger.info('Thread pool and chunk size:', {
-        cpus,
+        requestedThreads: args.threads,
+        allowedThreads: threadCount,
+        chunkSize,
+        maxChunks,
         fileSizeInBytes,
         minChunkSize,
-        potentialThreads,
-        threadCount,
-        chunkSize,
     });
 
     return {
@@ -79,19 +80,20 @@ function calculateThreadPoolAndChunkSize(args: {
     };
 }
 
-async function planTasks(filepath: string): Promise<Task[]> {
+/** Create worker payloads */
+async function planTasks(
+    filepath: string,
+    silent: boolean,
+    threads: number,
+): Promise<Task[]> {
     const fd = await fs.open(filepath, 'r');
     const fStats = await fd.stat();
-
-    logger.info('File stats:', {
-        filepath,
-        size: fStats.size,
-    });
 
     const { threadCount, chunkSize } =
         taskHelper.calculateThreadPoolAndChunkSize({
             fileSizeInBytes: fStats.size,
             minChunkSize: config.maxLineLength,
+            threads,
         });
 
     const tasks: Task[] = [];
@@ -102,6 +104,7 @@ async function planTasks(filepath: string): Promise<Task[]> {
             filepath,
             readStart: prevEnv,
             readEnd: prevEnv + chunkSize,
+            silent,
         };
 
         // push it here and mutate below

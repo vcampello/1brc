@@ -21,6 +21,11 @@ export type LoggerColor = (typeof LoggerColor)[keyof typeof LoggerColor];
 
 type ConsoleLog = Parameters<typeof console.log>;
 
+/**
+ * A simple logger to stdout.
+ *
+ * NOTE: it's not fancy and is blocking, so logging will affect performance
+ **/
 export class Logger {
     #prefix: string | number | undefined;
     #prefixColor: LoggerColor;
@@ -58,7 +63,7 @@ export class Logger {
         if (this.silent) {
             return;
         }
-        console.log(...this.#format(args));
+        console.log.apply(console.log, this.#format(args));
     }
 
     static inlineFlatObject<Obj extends Record<PropertyKey, unknown>>(

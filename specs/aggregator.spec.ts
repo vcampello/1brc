@@ -1,17 +1,17 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
-import { aggregatorHelper } from '../src/aggregator';
+import { Aggregator } from '../src/aggregator';
 
 describe('Aggregator', () => {
     test(`Aggregators are merged correctly`, () => {
-        const agg1 = aggregatorHelper.createAggregator();
-        aggregatorHelper.recordTemperature(agg1, 'A', 50);
+        const agg1 = Aggregator.createAggregator();
+        Aggregator.recordTemperature(agg1, 'A', 50);
 
-        const agg2 = aggregatorHelper.createAggregator();
-        aggregatorHelper.recordTemperature(agg2, 'A', -10);
-        aggregatorHelper.recordTemperature(agg2, 'B', 20);
+        const agg2 = Aggregator.createAggregator();
+        Aggregator.recordTemperature(agg2, 'A', -10);
+        Aggregator.recordTemperature(agg2, 'B', 20);
 
-        const combined = aggregatorHelper.mergeIntoNewAggregator(agg1, agg2);
+        const combined = Aggregator.mergeIntoNewAggregator(agg1, agg2);
 
         const validate = (args: {
             count: number;
@@ -20,9 +20,9 @@ describe('Aggregator', () => {
             min: number;
             name: string;
         }) => {
-            const s = aggregatorHelper
-                .stationList(combined)
-                .find((s) => s.name === args.name);
+            const s = Aggregator.stationList(combined).find(
+                (s) => s.name === args.name,
+            );
             assert.equal(s?.name, args.name);
             assert.equal(s?.count, args.count);
             assert.equal(s?.min, args.min);
@@ -47,14 +47,14 @@ describe('Aggregator', () => {
     });
 
     test('Correctly converts aggregator to string', () => {
-        const agg = aggregatorHelper.createAggregator();
-        aggregatorHelper.recordTemperature(agg, 'A', 50.8);
-        aggregatorHelper.recordTemperature(agg, 'A', 49.2);
-        aggregatorHelper.recordTemperature(agg, 'B', -10.7);
+        const agg = Aggregator.createAggregator();
+        Aggregator.recordTemperature(agg, 'A', 508);
+        Aggregator.recordTemperature(agg, 'A', 492);
+        Aggregator.recordTemperature(agg, 'B', -107);
 
         assert.strictEqual(
             '{A=49.2/50.0/50.8, B=-10.7/-10.7/-10.7}',
-            aggregatorHelper.toString(agg),
+            Aggregator.toString(agg),
         );
     });
 });

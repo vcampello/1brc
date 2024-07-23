@@ -1,6 +1,6 @@
 import { config } from './config';
 
-export type Station = {
+export type IStation = {
     count: number;
     max: number;
     min: number;
@@ -51,7 +51,10 @@ function parseTempWithoutDecimals(buffer: Buffer, start: number): number {
     return signature * parsed;
 }
 
-function toString(station: Station) {
+/** Convert station to string.
+ * E.g.:  Zürich=-40.3/9.3/57.3
+ */
+function toString(station: IStation) {
     const min = (station.min / 10).toFixed(1);
     const max = (station.max / 10).toFixed(1);
     const mean = (station.sum / station.count / 10).toFixed(1);
@@ -59,7 +62,7 @@ function toString(station: Station) {
     return `${station.name}=${min}/${mean}/${max}` as const;
 }
 
-function createStation(name: string, temp: number): Station {
+function createStation(name: string, temp: number): IStation {
     return {
         count: 1,
         max: temp,
@@ -69,14 +72,16 @@ function createStation(name: string, temp: number): Station {
     };
 }
 
-function updateStation(station: Station, temp: number): void {
+/** Record station temperature */
+function recordTemperature(station: IStation, temp: number): void {
     station.min = Math.min(station.min, temp);
     station.max = Math.max(station.max, temp);
     station.sum += temp;
     station.count++;
 }
 
-function mergeIntoTarget(target: Station, other: Station) {
+/** Merge another station object data into the target */
+function mergeIntoTarget(target: IStation, other: IStation) {
     if (other.name !== target.name) {
         throw new Error(
             `Cannot merge stations with different names. Expected ${target.name} but received ${other.name}`,
@@ -89,11 +94,11 @@ function mergeIntoTarget(target: Station, other: Station) {
     target.count += other.count;
 }
 
-export const stationHelper = {
+export const Station = {
     createStation,
     mergeIntoTarget,
     parseTempWithDecimals,
     parseTempWithoutDecimals,
     toString,
-    updateStation,
+    recordTemperature,
 };

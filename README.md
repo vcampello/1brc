@@ -27,7 +27,7 @@ Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>
 head -n 50000000 measurements.txt > sample.txt` to use a smaller line count.
 ```
 
-3. Build the solution
+3. Build the solution with `Nodejs 22`
 
 ```sh
 npm run build

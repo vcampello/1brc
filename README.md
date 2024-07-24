@@ -11,7 +11,7 @@ Along the way I also experiment with other things that would normally be impleme
 # Usage
 
 ```sh
-Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>]
+Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>] [--help]
  -f, --file             specificy the weather station file
  -s, --silent           only display the output
  -t, --threads <number> number of threads (will be overriden if there are not enough lines)
@@ -20,11 +20,11 @@ Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>
 
 # Running
 
-1. Generate the source data by following the [instructions](https://github.com/gunnarmorling/1brc) on the original challenge.
-2. Optionally run
+1. Generate the source data by following the [instructions](https://github.com/gunnarmorling/1brc) on the original challenge
+2. Optionally run the following to use a smaller line count
 
 ```sh
-head -n 50000000 measurements.txt > sample.txt` to use a smaller line count.
+head -n 50000000 measurements.txt > sample.txt
 ```
 
 3. Build the solution with `Nodejs 22`
@@ -36,5 +36,5 @@ npm run build
 4. Run the solution (see [Usage](#Usage) for more options)
 
 ```sh
-time node dist/index.js --file <path/to/measurements.txt>
+time node dist/index.js --file path/to/measurements.txt
 ```

@@ -1,0 +1,59 @@
+[tools]
+# required by the data generator
+java = "temurin-21"
+maven = "3.9.12"
+
+# project dependencies
+node = "24"
+
+
+# ------------------------------------------------------------------------------
+# tasks: project 
+# ------------------------------------------------------------------------------
+[tasks.init]
+description = "Setup project"
+run = [
+    # 
+    { task = "update-submodules" },
+    "mise install",
+]
+
+# ------------------------------------------------------------------------------
+# tasks: data generation
+# ------------------------------------------------------------------------------
+[tasks.update-submodules]
+description = "Pull original 1brc repo to generate data source"
+dir = "{{ config_root }}"
+run = """
+    git submodule init
+    git submodule update
+"""
+
+[tasks.build-data-generator]
+description = "Build 1brc data generator"
+dir = "generator"
+depends = ["pull-submodules"]
+run = """
+    mvn clean verify
+"""
+
+[tasks.generate]
+description = "Generate dataset in ./data/{line_count}_measurements.txt"
+dir = "generator"
+usage = """
+    arg "<line_count>" help="Number of lines to generate"
+"""
+run = """
+    ./create_measurements.sh ${usage_line_count}
+    mv -v ./measurements.txt ../data/${usage_line_count}_measurements.txt
+"""
+
+[tasks.generate-datasets]
+description = "Generate a few datasets for testing"
+dir = "{{ config_root }}"
+run = [
+    { task = "generate 1000" },
+    { task = "generate 1000000" },
+    # TODO: re-enable this
+    # { task = "generate 1000000000" },
+]

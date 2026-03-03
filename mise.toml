@@ -32,7 +32,7 @@ run = """
 [tasks.build-data-generator]
 description = "Build 1brc data generator"
 dir = "generator"
-depends = ["pull-submodules"]
+depends = ["update-submodules"]
 run = """
     mvn clean verify
 """

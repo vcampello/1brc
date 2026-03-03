@@ -6,6 +6,15 @@ This repository contains various implementations of [**The 1 Billion Row Challen
 
 The goal is to discover what modern runtimes can achieve out of the box without making the implementation unmaintainable or relying on native extensions (like `node-gyp` for Node.js). This project also serves as an experiment in building high-performance utilities—such as loggers and command-line parsers—using standard libraries.
 
+### Roadmap
+
+- Languages
+    - [x] TypeScript (Node.js)
+    - [ ] Go
+    - [ ] Rust
+- Monorepo
+    - [ ] add tasks to build and run every implementation
+
 ## Structure
 
 ```
@@ -70,12 +79,3 @@ Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>
  -t, --threads <number> number of threads (will be overriden if there are not enough lines)
  -h, --help             display this help and exit
 ```
-
-# Roadmap
-
-- Languages
-    - [x] TypeScript (Node.js)
-    - [ ] Go
-    - [ ] Rust
-- Monorepo
-- [ ] add tasks to build and run every implementation

@@ -1,3 +1,8 @@
+experimental_monorepo_root = true
+
+[monorepo]
+config_roots = ["nodejs"]
+
 [tools]
 # required by the data generator
 java = "temurin-21"
@@ -5,7 +10,6 @@ maven = "3.9.12"
 
 # project dependencies
 node = "24"
-
 
 # ------------------------------------------------------------------------------
 # tasks: project 
@@ -16,6 +20,7 @@ run = [
     # 
     { task = "update-submodules" },
     "mise install",
+    { task = "//nodejs:init" },
 ]
 
 # ------------------------------------------------------------------------------

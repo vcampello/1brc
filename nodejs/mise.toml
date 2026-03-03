@@ -1,0 +1,6 @@
+[env]
+_.path = ["./node_modules/.bin"]
+
+[tasks.init]
+dir = "{{ config_root }}"
+run = """npm install"""

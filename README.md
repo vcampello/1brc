@@ -26,14 +26,19 @@ This project uses [**`mise`**](https://mise.jdx.dev/) to manage all tools and ta
     curl [https://mise.jdx.dev/install.sh](https://mise.jdx.dev/install.sh) | sh
     ```
 
+```sh
+# Initialise the project
+mise run init
+
+> [!WARNING]
+> This repo uses has the 1 billion row challenges repo as a submodule. `mise run init` takes care of the proper initialisation.
+```
+
 ## Dataset
 
 The data is generated into the `./data` directory. You can generate the full billion rows or a smaller sample for testing.
 
 ```sh
-# Initialise the project
-mise run init
-
 # Generate the dataset
 mise run generate 1000000000 # or some other smaller number
 ```

@@ -1,14 +1,62 @@
-# The 1 Billion Row Challenge
+# 1BRC: The Polyglot One Billion Row Challenge
 
-A typescript implementation of [The 1 Billion Row Challenge](https://github.com/gunnarmorling/1brc)
+This repository contains various implementations of [**The 1 Billion Row Challenge**](https://github.com/gunnarmorling/1brc). Originally a Java-focused benchmark, this project explores the performance limits of different runtimes—starting with **Node.js**, **Go**, and **Rust**—to process 1,000,000,000 rows of temperature data as efficiently as possible.
 
 ## Motivation
 
-To find out what Node.js can do out of the box without making the implementation unmaintainable or using node-gyp.
+The goal is to discover what modern runtimes can achieve out of the box without making the implementation unmaintainable or relying on native extensions (like `node-gyp` for Node.js). This project also serves as an experiment in building high-performance utilities—such as loggers and command-line parsers—using standard libraries.
 
-Along the way I also experiment with other things that would normally be implemented using libraries such as logger and command line option parsers.
+## Structure
 
-# Usage
+```
+.
+├── data                 # Dataset dictory
+├── generator            # 1BRC data generator
+├── mise.toml            # Tooling and task management
+├── nodejs               # Node.js implementation
+└── README.md
+```
+
+## Prerequisites
+
+This project uses [**`mise`**](https://mise.jdx.dev/) to manage all tools and tasks. You do not need to manually install Java, Maven, or Node.js.
+
+1. **Install mise:**
+    ```sh
+    curl [https://mise.jdx.dev/install.sh](https://mise.jdx.dev/install.sh) | sh
+    ```
+
+## Dataset
+
+The data is generated into the `./data` directory. You can generate the full billion rows or a smaller sample for testing.
+
+```sh
+# Initialise the project
+mise run init
+
+# Generate the dataset
+mise run generate 1000000000 # or some other smaller number
+```
+
+# Node.js
+
+## Running
+
+Build the solution with `Nodejs 22`
+
+```sh
+cd nodejs
+npm run build
+```
+
+Run the solution
+
+```sh
+time node dist/index.js --file path/to/measurements.txt # probably ../data/1000000000_measurements.txt
+
+```
+
+## Usage
 
 ```sh
 Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>] [--help]
@@ -18,23 +66,11 @@ Usage: node dist/index.js --file measurements.txt [--silent] [--threads <number>
  -h, --help             display this help and exit
 ```
 
-# Running
+# Roadmap
 
-1. Generate the source data by following the [instructions](https://github.com/gunnarmorling/1brc) on the original challenge
-2. Optionally run the following to use a smaller line count
-
-```sh
-head -n 50000000 measurements.txt > sample.txt
-```
-
-3. Build the solution with `Nodejs 22`
-
-```sh
-npm run build
-```
-
-4. Run the solution (see [Usage](#Usage) for more options)
-
-```sh
-time node dist/index.js --file path/to/measurements.txt
-```
+- Languages
+    - [x] TypeScript (Node.js)
+    - [ ] Go
+    - [ ] Rust
+- Monorepo
+- [ ] add tasks to build and run every implementation

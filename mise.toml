@@ -17,7 +17,6 @@ node = "24"
 [tasks.init]
 description = "Setup project"
 run = [
-    # 
     { task = "update-submodules" },
     "mise install",
     { task = "//nodejs:init" },

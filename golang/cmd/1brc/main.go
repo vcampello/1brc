@@ -15,7 +15,7 @@ import (
 
 func main() {
 	duration := bench.RunVoid(process)
-	fmt.Println(duration)
+	fmt.Printf("%.3fs\n", duration.Seconds())
 }
 
 func process() {
@@ -35,6 +35,7 @@ func process() {
 		}
 	}()
 
+	// TODO: read into a pre-allocated buffer
 	reader := bufio.NewReader(file)
 
 	// state machine to parse lines conditionally

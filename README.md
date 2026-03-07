@@ -1,16 +1,16 @@
 # 1BRC: The Polyglot One Billion Row Challenge
 
-This repository contains various implementations of [**The 1 Billion Row Challenge**](https://github.com/gunnarmorling/1brc). Originally a Java-focused benchmark, this project explores the performance limits of different runtimes—starting with **Node.js**, **Go**, and **Rust**—to process 1,000,000,000 rows of temperature data as efficiently as possible.
+This repository contains various implementations of [**The 1 Billion Row Challenge**](https://github.com/gunnarmorling/1brc). Originally a Java focused benchmark, this project explores the performance limits of different runtimes—starting with **Node.js**, **Go**, and **Rust** to process 1,000,000,000 rows of temperature data as efficiently as possible without external libraries.
 
 ## Motivation
 
-The goal is to discover what modern runtimes can achieve out of the box without making the implementation unmaintainable or relying on native extensions (like `node-gyp` for Node.js). This project also serves as an experiment in building high-performance utilities—such as loggers and command-line parsers—using standard libraries.
+The goal is to discover what modern runtimes can achieve out of the box without making the implementation unmaintainable or relying on native extensions (like `node-gyp` for Node.js). This project also serves as an experiment in building utilities such as loggers and command-line parsers using the standard libraries.
 
 ### Roadmap
 
 - Languages
     - [x] TypeScript (Node.js)
-    - [ ] Go
+    - [ ] Go (WIP)
     - [ ] Rust
 - Monorepo
     - [ ] add tasks to build and run every implementation
@@ -56,7 +56,7 @@ mise run generate 1000000000 # or some other smaller number
 
 ## Running
 
-Build the solution with `Nodejs 22`
+Build the solution with `Nodejs 24`
 
 ```sh
 cd nodejs
